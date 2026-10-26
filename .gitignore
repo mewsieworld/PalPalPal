@@ -1,3 +1,9 @@
+# My Shit
+build_tools/
+.gitignore
+build_32bit.bat
+build_64bit.bat
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
