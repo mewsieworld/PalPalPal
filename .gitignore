@@ -316,3 +316,4 @@ src/_update_token.py
 build/
 dist/
 update_token.txt
+*.pyc

@@ -50,7 +50,7 @@ if not exist "%VENV%\Scripts\python.exe" (
 "%VENV%\Scripts\python.exe" -m pip install --quiet --upgrade pip pillow pyinstaller || goto :fail
 
 "%VENV%\Scripts\python.exe" -m PyInstaller --noconfirm --onefile --windowed --name %NAME% --paths "%ROOT%\src" ^
-    --add-data "%ROOT%\src\docs;docs" --workpath "%ROOT%\build\%ARCH%" --specpath "%ROOT%\build" ^
+    --add-data "%ROOT%\docs;docs" --workpath "%ROOT%\build\%ARCH%" --specpath "%ROOT%\build" ^
     --distpath "%ROOT%\dist" "%ROOT%\src\palpalpal.py"
 set RESULT=%errorlevel%
 if not %RESULT% EQU 0 goto :fail
