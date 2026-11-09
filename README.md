@@ -71,7 +71,7 @@ PalPalPal supports:
 - Frame, Background, and Palette Export
 - Awesome Gradient button and Dark Mode
 ![Gradient](pics/gradient_menu.png)
-![Main View](pics/main_view_dark_mode.png)
+![MainView](pics/main_view_dark_mode.png)
 - A sprite editor that supports multiple tools, layers, animations, shortcuts, histograms (Options > Other Options),
 	and so much more.
 ![Sprite](pics/sprite_tool.png)
