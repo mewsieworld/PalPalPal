@@ -69,6 +69,19 @@ def insert_contents(t, entries):
     t.insert("end", "─" * 60 + "\n", "rule")
 
 
+LIST_STEP = 22   # pixels each list level moves in
+LIST_TEXT = 18   # pixels from a bullet to its text
+
+
+def list_tag(t, level, carry_on=False):
+    """A tag for list text at this level: wrapped and carried-on lines line up with the item's text."""
+    left = 8 + level * LIST_STEP
+    name = "list%d%s" % (level, "c" if carry_on else "")
+    t.tag_configure(name, lmargin1=left + LIST_TEXT if carry_on else left, lmargin2=left + LIST_TEXT,
+                    tabs=(left + LIST_TEXT,))
+    return name
+
+
 def render_markdown(text_widget, source):
     """A small Markdown subset into a Text widget: headings, bullets, numbered lines, bold, code and rules,
     with a table of contents under the title."""
@@ -76,8 +89,11 @@ def render_markdown(text_widget, source):
     toc = headings(source)
     seen_title = False
     heading_no = 0
+    open_items = []   # the indents of the list items we're inside, outermost first
     for line in source.splitlines():
         stripped = line.strip()
+        if stripped.startswith("#") or stripped in ("---", "***"):
+            open_items.clear()
         if stripped.startswith("### "):
             t.insert("end", stripped[4:] + "\n", "h3")
             continue
@@ -98,15 +114,26 @@ def render_markdown(text_widget, source):
             t.insert("end", "─" * 60 + "\n", "rule")
             continue
         base = ()
-        if re.match(r"^[-*] ", stripped):
-            indent = "    " * (len(line) - len(line.lstrip(" ")) // 2)
-            t.insert("end", indent + "  •  ", "bullet")
-            stripped = stripped[2:]
-            base = ("item",)
-        elif re.match(r"^\d+\. ", stripped):
-            num, stripped = stripped.split(" ", 1)
-            t.insert("end", "  " + num + "  ", "bullet")
-            base = ("item",)
+        indent = len(line.expandtabs(4)) - len(line.expandtabs(4).lstrip())
+        marker = re.match(r"^([-*+]|\d+[.)]) ", stripped)
+        if marker:
+            # Nesting like Obsidian: deeper than the item above = one level in, however many tabs / spaces
+            while open_items and indent < open_items[-1]:
+                open_items.pop()
+            if not open_items or indent > open_items[-1]:
+                open_items.append(indent)
+            level = len(open_items) - 1
+            sign = "•" if marker.group(1) in "-*+" else marker.group(1)
+            t.insert("end", sign + "\t", ("bullet", list_tag(t, level)))
+            stripped = stripped[len(marker.group(0)):]
+            base = (list_tag(t, level),)
+        elif stripped and open_items and indent > 0:
+            # An indented line under an item carries on that item: lined up with its text, not a new level
+            while len(open_items) > 1 and indent < open_items[-1]:
+                open_items.pop()
+            base = (list_tag(t, len(open_items) - 1, carry_on=True),)
+        elif stripped:
+            open_items.clear()   # a plain paragraph ends the list
         for part in INLINE.split(stripped):
             if part.startswith("**") and part.endswith("**") and len(part) > 4:
                 t.insert("end", part[2:-2], base + ("bold",))
@@ -145,7 +172,6 @@ class DocViewer:
         self.text.tag_configure("bold", font=("Segoe UI", 10, "bold"))
         self.text.tag_configure("code", font=("Consolas", 10), background=c["select"])
         self.text.tag_configure("bullet", foreground=accent)
-        self.text.tag_configure("item", lmargin2=36)
         self.text.tag_configure("rule", foreground="#888888")
         self.text.tag_configure("toc", foreground=accent, underline=True)
         self.text.tag_bind("toc", "<Enter>", lambda e: self.text.configure(cursor="hand2"))

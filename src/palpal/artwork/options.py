@@ -1,6 +1,7 @@
 """Artwork Tool: the Options windows."""
 
 from .common import *  # noqa: F401,F403  (stdlib, Tk, Pillow and the app constants)
+from ..ui.theme import hint
 
 
 class OptionsMixin:
@@ -118,7 +119,8 @@ class OptionsMixin:
         b3.configure(command=lambda: pick("bg_custom", b3))
         b3._cp_keep = True
         b3.grid(row=3, column=3)
-        tk.Label(f, text="*Affects BMP exports", fg="gray", font=("Arial", 8)).grid(row=4, column=0, columnspan=4, sticky="w")
+        hint(tk.Label(f, text="*Affects BMP exports", fg="gray", font=("Arial", 8)), "grid", row=4, column=0,
+             columnspan=4, sticky="w")
         if self.dark_mode:
             get_dark, toggle_dark = self.dark_mode
             # Kept on self: a local variable would be garbage collected and the tick would vanish

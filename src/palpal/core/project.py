@@ -2,7 +2,8 @@
 
 from .common import *  # noqa: F401,F403  (stdlib, Tk, Pillow and the app constants)
 from .colors import pad256
-from .images import Frame, ImageLayer, PaletteLayer, to_indexed
+from .images import to_indexed
+from .layers import Frame, ImageLayer, PaletteLayer
 
 
 # ---------------------------------------------------------------------------

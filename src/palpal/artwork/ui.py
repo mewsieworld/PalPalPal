@@ -2,7 +2,7 @@
 
 from .common import *  # noqa: F401,F403  (stdlib, Tk, Pillow and the app constants)
 from .look import TOOL_GROUP_COLORS
-from .model import hex_to_rgba, rgba_hex
+from ..ui.theme import hint
 from .controls import ControlsMixin
 
 
@@ -177,7 +177,7 @@ class UiMixin(ControlsMixin):
         self.zoom_lbl.pack(side="left")
         tk.Button(zoom, text="+", width=2, command=lambda: self.zoom_by(1)).pack(side="left")
         tk.Button(zoom, text="Reset", command=lambda: self.zoom_by(0)).pack(side="left", padx=4)
-        tk.Label(zoom, text="Scroll to zoom · right-drag to pan", fg="gray", font=("Arial", 8)).pack(side="left")
+        hint(tk.Label(zoom, text="Scroll to zoom · right-drag to pan", fg="gray", font=("Arial", 8)), side="left")
 
         # Right: layers, frames, preview, and the panels Other Options can reveal
         right_outer = tk.Frame(body, width=330)

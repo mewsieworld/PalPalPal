@@ -3,12 +3,11 @@
 from ..core.common import *  # noqa: F401,F403  (stdlib, Tk, Pillow and the app constants)
 from ..core.colors import avoid_key, hsv_int_to_rgb, pad256, parse_hex, rgb_to_hsv_int, to_hex
 from ..core.palettes import read_palette
-from ..ui.theme import Theme, center_on
-from ..ui.widgets import (SavedColorsPanel, SortButton, draw_swatch, hsv_row, is_custom_sort, make_swatch,
-    picker_row, relay_swatches, set_pick_mode, sort_indices, swatch_grid)
+from ..ui.widgets import draw_swatch
+from ..ui.picker_row import set_pick_mode
+from ..ui.sort_button import is_custom_sort
 from ..ui.gradient import GradientMenu, GradientTarget
-from ..preview.canvas import PreviewView, bind_pan_and_zoom
-from ..ui.dialogs import ask_save_sorted
+from ..ui.color_prompts import ask_save_sorted
 
 
 class SwitcherEditMixin:

@@ -1,10 +1,8 @@
 """Mass Frame Editor: the frame canvas, strip, zoom and eyedropper."""
 
 from ..core.common import *  # noqa: F401,F403  (stdlib, Tk, Pillow and the app constants)
-from ..core.storage import export_dir
-from ..core.colors import avoid_key, bg_fill, flat_palette, hsl_to_rgb, parse_hex, rgb_to_hsl, to_hex
-from ..ui.theme import Theme, center_on
-from ..ui.widgets import draw_swatch, swatch_grid
+from ..core.colors import bg_fill, to_hex
+from ..ui.widgets import draw_swatch
 from .constants import MASS_ZOOMS
 
 
@@ -74,6 +72,8 @@ class MassEditorCanvasMixin:
             draw_swatch(self.app, sw, self.palette.colors[idx], idx in chosen)
 
     def render_mappings(self):
+        if getattr(self, "_typing_mappings", False):
+            return   # don't rewrite the box under the cursor while it's being edited
         self.map_text.delete("1.0", "end")
         if self.palette is None:
             return

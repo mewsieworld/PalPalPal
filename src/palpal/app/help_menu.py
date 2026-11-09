@@ -1,8 +1,8 @@
-"""PalPalPal main window: the Help menu (the debug items only show when Document Settings turns them on)
+"""PalPalPal main window: the Help menu (the debug items only show when Document & 3D Settings turns them on)
 and Help > Reset Layers."""
 
 from ..core.common import *  # noqa: F401,F403  (stdlib, Tk, Pillow and the app constants)
-from ..core.images import ImageLayer
+from ..core.layers import ImageLayer
 from ..ui.docs_viewer import open_doc
 from .cache import clear_cache
 
@@ -14,8 +14,8 @@ class AppHelpMixin:
         self.help_menu = menu
         menu.delete(0, "end")
         menu.add_command(label="Statistics", command=self.show_statistics)
-        menu.add_command(label="Manual", command=lambda: open_doc(self, "manual"))
-        menu.add_command(label="Changelog", command=lambda: open_doc(self, "changelog"))
+        menu.add_command(label="Manual", accelerator="M", command=lambda: open_doc(self, "manual"))
+        menu.add_command(label="Changelog", accelerator="H", command=lambda: open_doc(self, "changelog"))
         menu.add_command(label="About %s" % APP_NAME, command=self.show_about)
         menu.add_separator()
         menu.add_command(label="Reset Frames", command=self.reset_frames)

@@ -1,9 +1,7 @@
 """PalPalPal main window: the Layers box."""
 
 from ..core.common import *  # noqa: F401,F403  (stdlib, Tk, Pillow and the app constants)
-from ..core.colors import to_hex
-from ..core.images import BLEND_MODES, ImageLayer, PaletteLayer, clone_palette
-from ..ui.theme import Theme, Tooltip
+from ..core.layers import clone_palette, ImageLayer, PaletteLayer
 from .layer_rows import AppLayerRowsMixin
 
 
@@ -118,6 +116,14 @@ class AppLayersMixin(AppLayerRowsMixin):
             self.switcher.update_preview_soon()
         if layer is self.compact.layer():
             self.compact.redraw()
+        # The Layers box's palette strips and thumbnails, once the edits settle
+        if getattr(self, "_layers_box_job", None):
+            self.master.after_cancel(self._layers_box_job)
+        self._layers_box_job = self.master.after(150, self._refresh_layers_box_now)
+
+    def _refresh_layers_box_now(self):
+        self._layers_box_job = None
+        self.refresh_layers_box()
 
     def select_layer(self, index):
         if index == self.selected_layer:

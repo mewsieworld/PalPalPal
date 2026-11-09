@@ -1,14 +1,10 @@
 """The Mass Frame Editor (img2palette): edit every frame at once through their shared indexes."""
 
 from ..core.common import *  # noqa: F401,F403  (stdlib, Tk, Pillow and the app constants)
-from ..core.storage import export_dir
-from ..core.colors import avoid_key, bg_fill, flat_palette, hsl_to_rgb, parse_hex, rgb_to_hsl, to_hex
 from ..ui.theme import Theme, center_on
-from ..ui.widgets import draw_swatch, swatch_grid
 from .layout import MassEditorLayoutMixin
 from .canvas import MassEditorCanvasMixin
 from .editing import MassEditorEditMixin
-from .constants import MASS_ZOOMS, FRAME_EXPORT_FORMATS  # noqa: F401 (re-exported)
 
 
 # ---------------------------------------------------------------------------
@@ -38,6 +34,8 @@ class FrameMassEditor(MassEditorLayoutMixin, MassEditorCanvasMixin, MassEditorEd
         self.boxes = {}
         self.photos = []
         self._lock = False
+        # What the palette looked like when it was last applied; Close goes back to it
+        self.applied_colors = list(self.palette.colors) if self.palette else []
 
         self.win = tk.Toplevel(app.master)
         self.win.title("Mass Frame Editor")
@@ -52,6 +50,25 @@ class FrameMassEditor(MassEditorLayoutMixin, MassEditorCanvasMixin, MassEditorEd
         center_on(self.win, app.master)
         self.win.after(80, self.redraw)
 
+    def apply_changes(self):
+        """Apply (top right): keep the edits made so far."""
+        if self.palette is None:
+            return
+        self.applied_colors = list(self.palette.colors)
+        self.app.layer_colors_changed(self.palette)
+        self.app.request_redraw()
+        self.applied_lbl.configure(text="Applied")
+        self.win.after(1500, lambda: self.applied_lbl.winfo_exists() and self.applied_lbl.configure(text=""))
+
     def close(self):
+        """Close (bottom left, or the window's X): cancel anything not applied and put the preview back.
+        Asks first when there are changes that weren't applied (or reset)."""
+        if self.palette is not None and list(self.palette.colors) != self.applied_colors:
+            if not messagebox.askyesno("Mass Frame Editor", "You changed the palette but didn't apply it.\n\n"
+                                       "Close anyway and throw those changes away?", parent=self.win):
+                return
+            self.palette.colors[:] = self.applied_colors
+            self.app.layer_colors_changed(self.palette)
+            self.app.request_redraw()
         self.win.destroy()
         self.app.mass_editor = None

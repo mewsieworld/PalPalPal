@@ -2,7 +2,6 @@
 
 from .common import *  # noqa: F401,F403  (stdlib, Tk, Pillow and the app constants)
 from .look import button_color, round_button
-from .look import TOOL_GROUP_COLORS
 from .model import hex_to_rgba, rgba_hex
 
 

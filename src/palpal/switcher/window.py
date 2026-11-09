@@ -1,17 +1,10 @@
 """The Super Swatch Switcher palette editor window (Simple, Advanced and NuAge skins)."""
 
 from ..core.common import *  # noqa: F401,F403  (stdlib, Tk, Pillow and the app constants)
-from ..core.colors import avoid_key, hsv_int_to_rgb, pad256, parse_hex, rgb_to_hsv_int, to_hex
-from ..core.palettes import read_palette
-from ..ui.theme import Theme, center_on
-from ..ui.widgets import (SavedColorsPanel, SortButton, draw_swatch, hsv_row, is_custom_sort, make_swatch,
-    picker_row, relay_swatches, set_pick_mode, sort_indices, swatch_grid)
-from ..ui.gradient import GradientMenu, GradientTarget
-from ..preview.canvas import PreviewView, bind_pan_and_zoom
-from ..ui.dialogs import ask_save_sorted
+from ..core.colors import rgb_to_hsv_int
+from ..ui.theme import center_on
 from .layouts import SwitcherLayoutMixin
 from .editing import SwitcherEditMixin
-from .constants import SKIN_SIZES  # noqa: F401 (re-exported)
 
 
 # ---------------------------------------------------------------------------

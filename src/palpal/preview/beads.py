@@ -18,6 +18,11 @@ CUBE_FACES = [((0, 0, 1), ((0, 0, 1), (1, 0, 1), (1, 1, 1), (0, 1, 1))),
               ((0, 1, 0), ((0, 1, 0), (0, 1, 1), (1, 1, 1), (1, 1, 0))),
               ((0, -1, 0), ((0, 0, 0), (1, 0, 0), (1, 0, 1), (0, 0, 1)))]
 FACE_LIGHT = (1.0, 0.55, 0.8, 0.7, 0.65, 0.9)   # same order as CUBE_FACES: lit from above
+MIRROR_LIGHT = (1.0, 1.0, 0.8, 0.7, 0.65, 0.9)  # Mirror back: the back is lit like the front
+
+
+def face_light(app):
+    return MIRROR_LIGHT if app.heights.mirrored() else FACE_LIGHT
 
 
 def model_key(app, t, layers):
@@ -30,10 +35,10 @@ def model_key(app, t, layers):
     return tuple(parts)
 
 
-def build_model(app, t, layers):
-    """faces: one (x, y, z, face_index, shaded color) per bead face that nothing covers; plus the model's size."""
+def build_cells(app, t, layers):
+    """Every bead of the model: (x, y, z) -> (r, g, b). x right, y down (as in the picture), z up the stack."""
     cells = {}
-    slab = app.heights.max if app.heights.mode != "flat" else 1
+    slab = app.heights.slab()
     for k, il in enumerate(layers):
         img = app.transform(app.layer_canvas(il, t))
         px = img.load()
@@ -45,13 +50,21 @@ def build_model(app, t, layers):
             for x in range(img.width):
                 r, g, b, a = px[x, y]
                 if a >= 128:
-                    for z in range(hp[x, y] if hp is not None else 1):
+                    for z in app.heights.span(hp[x, y] if hp is not None else 1):
                         cells[(x + ox, y + oy, base + z)] = (r, g, b)
+    return cells
+
+
+def build_model(app, t, layers):
+    """faces: one (x, y, z, face_index, shaded color) per bead face that nothing covers; plus the model's size."""
+    cells = build_cells(app, t, layers)
+    slab = app.heights.slab()
+    lights = face_light(app)
     faces = []
     for (x, y, z), (r, g, b) in cells.items():
         for i, (n, _corners) in enumerate(CUBE_FACES):
             if (x + n[0], y + n[1], z + n[2]) not in cells:
-                light = FACE_LIGHT[i]
+                light = lights[i]
                 faces.append((x, y, z, i, (int(r * light), int(g * light), int(b * light))))
     w, h = app.transformed_size()
     return faces, (w, h, max(1, len(layers) * slab))
@@ -69,13 +82,14 @@ def layer_faces(app, t, k, il, slab):
         for x in range(img.width):
             r, g, b, a = px[x, y]
             if a >= 128:
-                for z in range(hp[x, y] if hp is not None else 1):
+                for z in app.heights.span(hp[x, y] if hp is not None else 1):
                     cells[(x, y, base + z)] = (r, g, b)
+    lights = face_light(app)
     faces = []
     for (x, y, z), (r, g, b) in cells.items():
         for i, (n, _corners) in enumerate(CUBE_FACES):
             if (x + n[0], y + n[1], z + n[2]) not in cells:
-                light = FACE_LIGHT[i]
+                light = lights[i]
                 faces.append((x, y, z, i, (int(r * light), int(g * light), int(b * light))))
     return faces
 
@@ -83,7 +97,7 @@ def layer_faces(app, t, k, il, slab):
 def moving_model(app, t, layers, cache):
     """While a layer is being dragged: each layer's own faces (cached), shifted by its 3D move. Faces where two
     layers touch aren't hidden here; the full model takes over as soon as the drag stops."""
-    slab = app.heights.max if app.heights.mode != "flat" else 1
+    slab = app.heights.slab()
     faces = []
     for k, il in enumerate(layers):
         key = (k, slab, t, app.flip, app.rotation, app.key_color, app.canvas_size(), str(app.heights.to_dict()),

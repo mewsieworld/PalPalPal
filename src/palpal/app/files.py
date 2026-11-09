@@ -5,10 +5,13 @@ from ..ui.color_picker import app_askcolor
 from ..preview.heights import HeightSettings
 from ..core.storage import export_dir
 from ..core.palettes import read_palette
-from ..core.images import (Frame, ImageLayer, PaletteLayer, convert_image, dropped_colors, exact_indexed, is_indexed,
-    read_image_frames, to_indexed, unify_frame_palettes)
+from ..core.images import (convert_image, dropped_colors, exact_indexed, is_indexed, read_image_frames, to_indexed,
+                           unify_frame_palettes)
+from ..core.layers import Frame, ImageLayer, PaletteLayer
 from ..core.project import load_project_file, save_project_file
-from ..ui.dialogs import ChoiceDialog, NewProjectDialog, ask_excess_colors
+from ..ui.dialogs import ChoiceDialog
+from ..ui.new_project import NewProjectDialog
+from ..ui.color_prompts import ask_excess_colors
 
 
 class AppFilesMixin:

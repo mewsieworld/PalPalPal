@@ -4,8 +4,8 @@ from ..core.common import *  # noqa: F401,F403  (stdlib, Tk, Pillow and the app 
 from ..preview.heights import HeightSettings
 from ..core.storage import UserStore
 from ..core.colors import parse_color_any
-from ..core.images import ImageLayer, PaletteLayer
-from ..ui.theme import Theme
+from ..core.layers import ImageLayer, PaletteLayer
+from ..ui.theme import Theme, set_hints_shown
 from ..ui.dialogs import Statistics
 from ..ui.compact import CompactEditor
 from .build import AppUiMixin
@@ -15,6 +15,8 @@ from .frames import AppFramesMixin
 from .frame_select import AppFrameSelectMixin
 from .help_menu import AppHelpMixin
 from .move3d import AppMove3DMixin
+from .shortcuts import AppShortcutsMixin
+from .export3d import AppExport3DMixin
 from .files import AppFilesMixin
 from .tools import AppToolsMixin
 
@@ -24,12 +26,14 @@ from .tools import AppToolsMixin
 # ---------------------------------------------------------------------------
 
 class PalPalPal(AppUiMixin, AppViewMixin, AppLayersMixin, AppFramesMixin, AppFrameSelectMixin, AppFilesMixin,
-                AppToolsMixin, AppHelpMixin, AppMove3DMixin):
+                AppToolsMixin, AppHelpMixin, AppMove3DMixin,
+                AppShortcutsMixin, AppExport3DMixin):
     START_MESSAGE = "START A NEW PROJECT, OPEN A PROJECT, OR READ THE MANUAL TO GET STARTED!"
 
     def __init__(self, master):
         self.master = master
         self.store = UserStore()
+        set_hints_shown(not self.store.get("hide_hints"))
         self.dark_mode = bool(self.store.get("dark_mode"))
         self.use_right_click = bool(self.store.get("use_right_click"))
         saved = [parse_color_any(c) for c in (self.store.get("saved_colors") or [])][:PALETTE_SIZE]
@@ -41,10 +45,10 @@ class PalPalPal(AppUiMixin, AppViewMixin, AppLayersMixin, AppFramesMixin, AppFra
         self.hidden_frames = set()
         self.selected_layer = -1   # index into self.layers (every palette in the project)
         self.sprite_tool = None
-        self.split_palettes = False   # Document Settings: a palette per frame, shown as Layers box tabs
+        self.split_palettes = False   # Document & 3D Settings: a palette per frame, shown as Layers box tabs
         self.palette_tab = 0
         self.layer_filter = "all"     # Layers box: all, images or palettes
-        self.heights = HeightSettings()  # Document Settings > 3D height settings
+        self.heights = HeightSettings()  # Document & 3D Settings > 3D height settings
         self.key_color = None
         self.bg_color = (255, 255, 255)
         self.flip = False

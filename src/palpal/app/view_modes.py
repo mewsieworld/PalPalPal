@@ -1,11 +1,7 @@
 """PalPalPal main window: preview modes, dark mode, 3D and Saved Colors."""
 
 from ..core.common import *  # noqa: F401,F403  (stdlib, Tk, Pillow and the app constants)
-from ..ui.docs_viewer import open_doc
-from ..core.colors import to_hex
-from ..ui.theme import Theme, Tooltip
-from ..ui.widgets import SavedColorsPanel
-from ..preview.canvas import ALIGNMENTS, PreviewView, bind_pan_and_zoom
+from ..ui.theme import Theme
 
 
 class AppViewModesMixin:

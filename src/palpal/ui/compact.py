@@ -3,8 +3,9 @@
 from ..core.common import *  # noqa: F401,F403  (stdlib, Tk, Pillow and the app constants)
 from ..core.colors import avoid_key, parse_hex, to_hex
 from .theme import Theme
-from .widgets import (SortButton, draw_swatch, hsv_row, picker_row, relay_swatches, set_pick_mode, sort_indices,
-    swatch_grid)
+from .widgets import draw_swatch, hsv_row, relay_swatches, swatch_grid
+from .picker_row import picker_row, set_pick_mode
+from .sort_button import sort_indices, SortButton
 from .gradient import GradientMenu, GradientTarget
 
 

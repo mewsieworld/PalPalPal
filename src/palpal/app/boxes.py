@@ -1,11 +1,7 @@
 """PalPalPal main window: the Timeline and Layers boxes and the compact bar."""
 
 from ..core.common import *  # noqa: F401,F403  (stdlib, Tk, Pillow and the app constants)
-from ..ui.docs_viewer import open_doc
-from ..core.colors import to_hex
-from ..ui.theme import Theme, Tooltip
-from ..ui.widgets import SavedColorsPanel
-from ..preview.canvas import ALIGNMENTS, PreviewView, bind_pan_and_zoom
+from ..ui.theme import Tooltip
 
 
 class AppBoxesMixin:
@@ -120,6 +116,7 @@ class AppBoxesMixin:
         Tooltip(eye, "Toggle All Frames' Visibility", self)
         tk.Button(row, text="Flip", width=4, command=self.toggle_flip).pack(side="left", padx=2)
         tk.Button(row, text="Rotate", width=6, command=self.rotate_preview).pack(side="left", padx=2)
+        self.reverse_button(row).pack(side="left", padx=2)
         undo = tk.Button(row, text="↶", width=3, command=self.undo_frame_visibility)
         undo.pack(side="left", padx=2)
         Tooltip(undo, "Undo Frame Visibility", self)

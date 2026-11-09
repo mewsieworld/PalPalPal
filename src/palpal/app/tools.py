@@ -4,9 +4,11 @@ from ..core.common import *  # noqa: F401,F403  (stdlib, Tk, Pillow and the app 
 from ..core.storage import HOME_DIR, app_dir, cache_dir, export_dir
 from ..core.colors import flat_palette, to_hex
 from ..core.palettes import palette_grid_image, read_palette, write_palette
-from ..core.images import Frame, ImageLayer, convert_image, requantize_layer, unify_frame_palettes
-from ..ui.theme import Theme, center_on
-from ..ui.dialogs import BGOptionsDialog, SettingsDialog
+from ..core.images import convert_image, requantize_layer, unify_frame_palettes
+from ..core.layers import Frame, ImageLayer
+from ..ui.theme import Theme
+from ..ui.settings_dialog import SettingsDialog
+from ..ui.bg_options import BGOptionsDialog
 from ..ui.document_settings import DocumentSettingsDialog
 from ..switcher.window import SwatchSwitcher
 from ..mass_editor.window import FrameMassEditor
@@ -19,7 +21,7 @@ class AppToolsMixin:
     # ----- colors -----
     def open_document_settings(self):
         if not self.image_layers() and not self.stack:
-            messagebox.showinfo("Document Settings", "Start a project or add an image first.")
+            messagebox.showinfo("Document & 3D Settings", "Start a project or add an image first.")
             return
         DocumentSettingsDialog(self).show()
 
@@ -48,6 +50,31 @@ class AppToolsMixin:
 
     def open_bg_options(self):
         BGOptionsDialog(self)
+
+    def start_eyedropper(self, done):
+        """The next click on the preview calls done(color under it); Esc calls done(None)."""
+        self.eyedropper = done
+        self.canvas.configure(cursor="crosshair")
+        self.master.bind("<Escape>", lambda e: self.finish_eyedropper(None))
+        self.master.focus_force()
+        text = "💧 Click a color in the preview to key it out  ·  Esc cancels"
+        if self.view.is_3d:
+            text += "\n(switch back to the 2D view first: Options > 3D Layer View)"
+        self._dropper_hint = tk.Label(self.canvas, text=text, bg="#FFF6C8", fg="black", font=("Arial", 9),
+                                      padx=8, pady=4, relief="solid", bd=1, justify="left")
+        self._dropper_hint._cp_keep = True
+        self._dropper_hint.place(x=8, y=8)
+
+    def finish_eyedropper(self, color):
+        done, self.eyedropper = getattr(self, "eyedropper", None), None
+        if done is None:
+            return
+        self.canvas.configure(cursor="")
+        self.master.unbind("<Escape>")
+        hint = getattr(self, "_dropper_hint", None)
+        if hint is not None and hint.winfo_exists():
+            hint.destroy()
+        done(color)
 
     def set_key_color(self, color):
         self.key_color = color
@@ -180,16 +207,34 @@ class AppToolsMixin:
                 img = frame.image.copy()
                 img.putpalette(flat_palette(palette))
                 img = self.transform(img)
-                keys = self.key_indices(frame, palette)
+                # keyed slots as the preview sees them (stacked palettes included), plus the palette's own
+                keys = self.key_indices(frame, palette) | self.key_indices(frame, self.effective_colors(il, t))
                 if ext == ".gif" and keys:
                     img.save(path, transparency=min(keys))
                 else:
                     img.save(path)
                 return
-            img = self.render(t, 1.0, background=True).convert("RGB").quantize(PALETTE_SIZE)
-            img.save(path)
+            self._save_flattened_indexed(t, path, ext)
             return
         self.render(t, 1.0, background=True).convert("RGB").save(path)
+
+    def _save_flattened_indexed(self, t, path, ext):
+        """Several layers into one 256-color image. GIF keeps keyed areas see-through (the last slot is the
+        clear one); BMP / PCX have no see-through, so keyed areas get the BG color, else the key color."""
+        rgba = self.render(t, 1.0, background=False)
+        clear = rgba.getchannel("A").point(lambda a: 255 if a < 128 else 0)
+        fill = self.bg_color or self.key_color or (255, 0, 255)
+        flat = Image.new("RGB", rgba.size, tuple(fill))
+        flat.paste(rgba.convert("RGB"), (0, 0), rgba.getchannel("A").point(lambda a: 255 if a >= 128 else 0))
+        if ext != ".gif" or not clear.getbbox():
+            flat.quantize(PALETTE_SIZE).save(path)
+            return
+        img = flat.quantize(PALETTE_SIZE - 1)
+        pal = (img.getpalette() or [])[:3 * (PALETTE_SIZE - 1)]
+        pal += [0] * (3 * (PALETTE_SIZE - 1) - len(pal)) + list(fill)
+        img.putpalette(pal)
+        img.paste(PALETTE_SIZE - 1, (0, 0), clear)
+        img.save(path, transparency=PALETTE_SIZE - 1)
 
     def export_frame(self):
         if not self.frame_count():

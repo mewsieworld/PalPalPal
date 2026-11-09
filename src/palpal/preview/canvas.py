@@ -2,7 +2,7 @@
 
 from ..core.common import *  # noqa: F401,F403  (stdlib, Tk, Pillow and the app constants)
 from .beads import build_model, model_key, moving_model, render
-from ..ui.theme import Theme
+from ..ui.theme import Theme, hints_shown
 
 
 # ---------------------------------------------------------------------------
@@ -175,10 +175,11 @@ class PreviewView:
             out, self.axes = render(faces, size, self.yaw, self.pitch, (cw, ch), backdrop, zoom)
         photo = ImageTk.PhotoImage(out)
         c.create_image(0, 0, image=photo, anchor="nw")
-        c.create_text(8, ch - 8, anchor="sw", fill="#888888", font=("Arial", 8),
-                      text="3D bead view: drag to move the selected layer (Shift+drag lifts it)"
-                      if getattr(self, "move_mode", False) else
-                      "3D bead view: drag to turn, Options > 3D Layer View to switch back to 2D")
+        if hints_shown():
+            c.create_text(8, ch - 8, anchor="sw", fill="#888888", font=("Arial", 8),
+                          text="3D bead view: drag to move the selected layer (Shift+drag lifts it)"
+                          if getattr(self, "move_mode", False) else
+                          "3D bead view: drag to turn, Options > 3D Layer View to switch back to 2D")
         self.photos.append(photo)
         c.configure(scrollregion=(0, 0, cw, ch))
 

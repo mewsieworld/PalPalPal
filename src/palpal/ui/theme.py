@@ -4,6 +4,28 @@ from ..core.common import *  # noqa: F401,F403  (stdlib, Tk, Pillow and the app 
 
 
 # ---------------------------------------------------------------------------
+# Helpful hints (the grey how-to lines); Document & 3D Settings > Show helpful hints turns them off
+# ---------------------------------------------------------------------------
+
+_HINTS = {"shown": True}
+
+
+def hints_shown():
+    return _HINTS["shown"]
+
+
+def set_hints_shown(on):
+    _HINTS["shown"] = bool(on)
+
+
+def hint(widget, manager="pack", **options):
+    """Place a hint label (pack or grid) unless hints are turned off. Returns the widget."""
+    if _HINTS["shown"]:
+        getattr(widget, manager)(**options)
+    return widget
+
+
+# ---------------------------------------------------------------------------
 # Theme (ported from code/utils/theme_manager.py)
 # ---------------------------------------------------------------------------
 

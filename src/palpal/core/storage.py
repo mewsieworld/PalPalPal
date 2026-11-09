@@ -96,7 +96,8 @@ class UserStore:
         "save_sorted_choice": None,  # remembered answer to "Save with custom sorting?"
         "mass_editor_default": False,
         "use_right_click": True,
-        "show_debug_menu": False,   # Help > Current Display Info / Debug Info (Document Settings turns them on)
+        "hide_hints": False,        # Document & 3D Settings > Show helpful hints (unticked hides them)
+        "show_debug_menu": False,   # Help > Current Display Info / Debug Info (Document & 3D Settings turns them on)
         "active_sort": ["index", True],  # Active Colors order: key and ascending?
         "compact_multi": False,  # Active Colors: clicking adds to a group instead of picking one color
         "saved_colors": [None] * DEFAULT_SAVED_SLOTS,

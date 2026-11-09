@@ -5,11 +5,15 @@ from .look import center_over, paint_buttons
 from .model import Layer
 from .ui import UiMixin
 from .drawing import DrawingMixin
+from .shapes import ShapesMixin
 from .mouse import MouseMixin
 from .selection import SelectionMixin
 from .render import RenderMixin
-from .layers_frames import LayersFramesMixin
+from .layers_panel import LayersMixin
+from .frames_panel import FramesMixin
 from .color_tools import ColorToolsMixin
+from .curves import CurvesMixin
+from .swap_remap import SwapRemapMixin
 from .transforms import TransformsMixin
 from .files import FilesMixin
 from .options import OptionsMixin
@@ -19,7 +23,8 @@ from .options import OptionsMixin
 # The editor window
 # ---------------------------------------------------------------------------
 
-class SpriteTool(UiMixin, DrawingMixin, MouseMixin, SelectionMixin, RenderMixin, LayersFramesMixin, ColorToolsMixin, TransformsMixin, FilesMixin, OptionsMixin):
+class SpriteTool(UiMixin, DrawingMixin, ShapesMixin, MouseMixin, SelectionMixin, RenderMixin, LayersMixin, FramesMixin,
+                 ColorToolsMixin, CurvesMixin, SwapRemapMixin, TransformsMixin, FilesMixin, OptionsMixin):
     def __init__(self, master, width=32, height=32, on_return=None, theme=None, colors=None, start_frames=None,
                  store_dir=None, read_palette=None, palette_types=None, dark_mode=None):
         self.master = master

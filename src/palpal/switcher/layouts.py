@@ -1,14 +1,12 @@
 """Super Swatch Switcher: the Simple, Advanced and NuAge layouts."""
 
 from ..core.common import *  # noqa: F401,F403  (stdlib, Tk, Pillow and the app constants)
-from ..core.colors import avoid_key, hsv_int_to_rgb, pad256, parse_hex, rgb_to_hsv_int, to_hex
-from ..core.palettes import read_palette
-from ..ui.theme import Theme, center_on
-from ..ui.widgets import (SavedColorsPanel, SortButton, draw_swatch, hsv_row, is_custom_sort, make_swatch,
-    picker_row, relay_swatches, set_pick_mode, sort_indices, swatch_grid)
-from ..ui.gradient import GradientMenu, GradientTarget
+from ..ui.theme import Theme
+from ..ui.widgets import hsv_row, make_swatch, relay_swatches, swatch_grid
+from ..ui.saved_colors import SavedColorsPanel
+from ..ui.picker_row import picker_row
+from ..ui.sort_button import sort_indices, SortButton
 from ..preview.canvas import PreviewView, bind_pan_and_zoom
-from ..ui.dialogs import ask_save_sorted
 from .constants import SKIN_SIZES
 
 

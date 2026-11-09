@@ -1,11 +1,10 @@
 """Mass Frame Editor: selecting and editing colors, mappings and export."""
 
 from ..core.common import *  # noqa: F401,F403  (stdlib, Tk, Pillow and the app constants)
+import re
 from ..ui.color_picker import app_askcolor
 from ..core.storage import export_dir
-from ..core.colors import avoid_key, bg_fill, flat_palette, hsl_to_rgb, parse_hex, rgb_to_hsl, to_hex
-from ..ui.theme import Theme, center_on
-from ..ui.widgets import draw_swatch, swatch_grid
+from ..core.colors import avoid_key, flat_palette, hsl_to_rgb, parse_hex, rgb_to_hsl, to_hex
 from .constants import FRAME_EXPORT_FORMATS
 
 
@@ -140,6 +139,52 @@ class MassEditorEditMixin:
     def copy_mappings(self):
         self.win.clipboard_clear()
         self.win.clipboard_append(self.map_text.get("1.0", "end").strip())
+
+    def paste_mappings(self):
+        """Paste "index=#RRGGBB" lines from the clipboard and apply them straight away."""
+        try:
+            text = self.win.clipboard_get()
+        except tk.TclError:
+            return
+        self.map_text.delete("1.0", "end")
+        self.map_text.insert("1.0", text.strip())
+        self.apply_mappings_text()
+        self.render_mappings()
+
+    def mappings_edited(self):
+        """Typing in the mappings box: apply it a moment after the last key (so half-typed colors don't flash)."""
+        job = getattr(self, "_mapping_job", None)
+        if job:
+            self.win.after_cancel(job)
+        self._typing_mappings = True
+        self._mapping_job = self.win.after(250, self._apply_typed_mappings)
+
+    def _apply_typed_mappings(self):
+        self._mapping_job = None
+        self.apply_mappings_text()
+        self.win.after(1500, lambda: setattr(self, "_typing_mappings", False))
+
+    def apply_mappings_text(self):
+        """Every complete "index=#RRGGBB" line becomes that index's color; anything else is left alone."""
+        if self.palette is None:
+            return 0
+        key = self.app.key_color
+        changed = 0
+        for line in self.map_text.get("1.0", "end").splitlines():
+            m = re.match(r"\s*(\d+)\s*[=:]\s*#?([0-9a-fA-F]{6})\s*$", line)
+            if not m:
+                continue
+            idx = int(m.group(1))
+            color = parse_hex(m.group(2))
+            if 0 <= idx < PALETTE_SIZE and color and tuple(self.palette.colors[idx]) != tuple(color):
+                self.palette.colors[idx] = avoid_key(color, key)
+                changed += 1
+        if changed:
+            self.app.stats.add("indexes_changed", changed)
+            self.app.layer_colors_changed(self.palette)
+            self.app.request_redraw()
+            self.redraw()
+        return changed
 
     def reset_all(self):
         if self.palette is None:

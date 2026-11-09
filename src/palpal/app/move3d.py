@@ -2,7 +2,7 @@
 image layer around in the bead model (Shift+drag lifts or lowers it) instead of turning the view."""
 
 from ..core.common import *  # noqa: F401,F403  (stdlib, Tk, Pillow and the app constants)
-from ..core.images import ImageLayer
+from ..core.layers import ImageLayer
 from ..ui.rounded import round_button
 
 TURN_TEXT, MOVE_TEXT = "⟳ Turn view", "✥ Move layer"

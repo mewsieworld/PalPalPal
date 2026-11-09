@@ -2,7 +2,8 @@
 
 from ..core.common import *  # noqa: F401,F403  (stdlib, Tk, Pillow and the app constants)
 from ..core.colors import flat_palette
-from ..core.images import Frame, frame_fits_palette, merge_frames_into_palette
+from ..core.images import frame_fits_palette, merge_frames_into_palette
+from ..core.layers import Frame
 from ..ui.dialogs import ChoiceDialog
 
 

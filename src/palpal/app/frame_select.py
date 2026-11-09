@@ -1,8 +1,8 @@
-"""PalPalPal main window: selecting frames on the canvas (Alt+click, drag a box) and F to flip (reverse) a
+"""PalPalPal main window: selecting frames on the canvas (Alt+click, drag a box) and V to reverse a
 frame's palette."""
 
 from ..core.common import *  # noqa: F401,F403  (stdlib, Tk, Pillow and the app constants)
-from ..core.images import ImageLayer
+from ..core.layers import ImageLayer
 
 ALT_MASK = 0x20000   # Tk's Alt modifier bit on Windows
 BAND_TAG = "frame_band"
@@ -10,7 +10,7 @@ BAND_TAG = "frame_band"
 
 class AppFrameSelectMixin:
     """In the All / Custom grids: Alt+click adds or removes a frame from the selection, and dragging a box
-    selects every frame it touches (hold Alt to add to the selection). F reverses the selected layer's palette
+    selects every frame it touches (hold Alt to add to the selection). V reverses the selected layer's palette
     on that frame."""
 
     # ----- Alt+click -----
@@ -54,7 +54,7 @@ class AppFrameSelectMixin:
         self.selected_frames = (self.selected_frames | picked) if add else picked
         self.request_redraw()
 
-    # ----- F: flip the palette -----
+    # ----- V: reverse the palette -----
     def flip_selected_frame(self):
         """Reverse the color order of the palette that colors the selected layer on this frame (or on every
         selected frame in a grid). Only the slots the image uses are reversed (the key color stays put), so

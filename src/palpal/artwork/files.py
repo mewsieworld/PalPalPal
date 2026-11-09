@@ -2,6 +2,7 @@
 
 from .common import *  # noqa: F401,F403  (stdlib, Tk, Pillow and the app constants)
 from .model import Layer, hex_to_rgba, rgba_hex
+from ..ui.theme import hint
 
 
 class FilesMixin:
@@ -17,7 +18,7 @@ class FilesMixin:
         aspect = self.W / float(self.H)
         top = self.popup()
         top.title("Crop Reference Image")
-        tk.Label(top, text="Drag to select region. Aspect ratio is locked to sprite size.", fg="gray").pack(pady=4)
+        hint(tk.Label(top, text="Drag to select region. Aspect ratio is locked to sprite size.", fg="gray"), pady=4)
         cv = tk.Canvas(top, width=shown.width, height=shown.height, highlightthickness=0, cursor="crosshair")
         cv.pack(padx=10)
         photo = ImageTk.PhotoImage(shown)

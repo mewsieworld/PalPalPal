@@ -1,4 +1,4 @@
-"""Clear Cache (Help menu and Document Settings): throw away files PalPalPal can rebuild by itself.
+"""Clear Cache (Help menu and Document & 3D Settings): throw away files PalPalPal can rebuild by itself.
 
 Cleared: Python's compiled-code caches (*.pyc), the Artwork Tool's autosave / recovery and saved workspace,
 and leftovers from an update (PalPalPal.exe.new, palpalpal_update.bat). Kept: your settings, Saved Colors,

@@ -3,7 +3,7 @@
 from ..core.common import *  # noqa: F401,F403  (stdlib, Tk, Pillow and the app constants)
 from ..ui.docs_viewer import open_doc
 from ..core.colors import bg_fill, flat_palette, to_hex
-from ..core.images import blend_color, blend_images
+from ..core.blend import blend_color, blend_images
 from ..ui.theme import Theme
 from ..preview.canvas import ALIGNMENTS
 from ..ui.dialogs import AllModeWarning
@@ -225,6 +225,9 @@ class AppViewMixin:
         if found is None:
             return
         il, pixel = found
+        if getattr(self, "eyedropper", None):
+            self.finish_eyedropper(self.effective_colors(il, t)[pixel])   # the color as it's shown
+            return
         palette = self.palette_coloring(il)
         if self.compact.picking:
             self.compact.hex_var.set(to_hex(palette.colors[pixel], False))
@@ -246,7 +249,7 @@ class AppViewMixin:
         menu.add_command(label="Switch to Single Preview", command=lambda: self.view_single_frame(idx))
         menu.add_command(label="Deselect Frame" if idx in self.selected_frames else "Select Frame",
                          command=lambda: self.toggle_frame_selection(idx))
-        menu.add_command(label="Flip This Frame's Palette (F)", command=lambda: (self.set_current_frame(idx),
+        menu.add_command(label="Reverse This Frame's Palette (V)", command=lambda: (self.set_current_frame(idx),
                                                                       self.flip_selected_frame()))
         menu.add_separator()
         menu.add_command(label="Hide This Frame", command=lambda: self.hide_frames({idx}))

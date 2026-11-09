@@ -1,10 +1,9 @@
 """PalPalPal main window: building the UI."""
 
 from ..core.common import *  # noqa: F401,F403  (stdlib, Tk, Pillow and the app constants)
-from ..ui.docs_viewer import open_doc
 from ..core.colors import to_hex
 from ..ui.theme import Theme, Tooltip
-from ..ui.widgets import SavedColorsPanel
+from ..ui.saved_colors import SavedColorsPanel
 from ..preview.canvas import ALIGNMENTS, PreviewView, bind_pan_and_zoom
 from .boxes import AppBoxesMixin
 from .view_modes import AppViewModesMixin
@@ -19,28 +18,14 @@ class AppUiMixin(AppBoxesMixin, AppViewModesMixin):
         m.geometry("1050x650")
         m.minsize(1050, 650)
 
-        m.bind("b", lambda e: self._shortcut(self.open_bg_options))
-        m.bind("e", lambda e: self._shortcut(self.export_background))
-        m.bind("E", lambda e: self._shortcut(self.export_all_frames))
-        m.bind("o", lambda e: self._shortcut(self.open_settings))
-        m.bind("p", lambda e: self._shortcut(self.open_switcher))
-        m.bind("P", lambda e: self._shortcut(self.export_palette))
-        m.bind("r", lambda e: self._shortcut(self.reset_pals))
-        m.bind("d", lambda e: self._shortcut(self.debug_info) if self.store.get("show_debug_menu") else None)
-        m.bind("v", lambda e: self._shortcut(self.toggle_view_mode))
-        m.bind("f", lambda e: self._shortcut(self.flip_selected_frame))
-        m.bind("<Control-s>", lambda e: self.save_project())
-        m.bind("<Control-n>", lambda e: self.new_project())
-        m.bind("<Control-o>", lambda e: self.open_project())
-        m.bind_all("<Left>", lambda e: self._arrow(-1))
-        m.bind_all("<Right>", lambda e: self._arrow(1))
+        self.bind_shortcuts()   # every key is listed in shortcuts.py
 
         menubar = tk.Menu(m)
         file_menu = tk.Menu(menubar, tearoff=0)
         file_menu.add_command(label="New", accelerator="Ctrl+N", command=self.new_project)
         file_menu.add_command(label="Open...", accelerator="Ctrl+O", command=self.open_project)
         file_menu.add_command(label="Save", accelerator="Ctrl+S", command=self.save_project)
-        file_menu.add_command(label="Save As...", command=self.save_project_as)
+        file_menu.add_command(label="Save As...", accelerator="Ctrl+Shift+S", command=self.save_project_as)
         file_menu.add_separator()
         file_menu.add_command(label="Import Image as Frames...", command=self.import_frames)
         file_menu.add_command(label="Import Image as Layer...", command=self.open_images)
@@ -49,17 +34,18 @@ class AppUiMixin(AppBoxesMixin, AppViewModesMixin):
         file_menu.add_command(label="Quit", command=self.on_quit)
         menubar.add_cascade(label="File", menu=file_menu)
         edit_menu = tk.Menu(menubar, tearoff=0)
-        edit_menu.add_command(label=SWITCHER_NAME, accelerator="P", command=self.open_switcher)
-        edit_menu.add_command(label="Artwork Tool", command=self.open_sprite_tool)
-        edit_menu.add_command(label="Mass Frame Editor (img2palette)", command=self.open_mass_editor)
-        edit_menu.add_command(label="Img2img Palette Swap", command=self.open_adjuster)
+        edit_menu.add_command(label=SWITCHER_NAME, accelerator="S", command=lambda: self.open_switcher(force=True))
+        edit_menu.add_command(label="Artwork Tool", accelerator="C", command=self.open_sprite_tool)
+        edit_menu.add_command(label="Mass Frame Editor (img2palette)", accelerator="E", command=self.open_mass_editor)
+        edit_menu.add_command(label="Img2img Palette Swap", accelerator="W", command=self.open_adjuster)
         menubar.add_cascade(label="Edit", menu=edit_menu)
+        view_menu = self.build_view_menu(menubar)
         options_menu = tk.Menu(menubar, tearoff=0)
         options_menu.add_checkbutton(label="3D Layer View", variable=self.view_3d_var, command=self.toggle_3d)
         options_menu.add_command(label="Reset 3D View", command=self.reset_3d)
         options_menu.add_separator()
-        options_menu.add_command(label="Document Settings...", command=self.open_document_settings)
-        options_menu.add_command(label="BG Options...", command=self.open_bg_options)
+        options_menu.add_command(label="Document & 3D Settings...", command=self.open_document_settings)
+        options_menu.add_command(label="BG Options...", accelerator="B", command=self.open_bg_options)
         options_menu.add_command(label="Frame Settings...", command=self.open_settings)
         menubar.add_cascade(label="Options", menu=options_menu)
         export_menu = tk.Menu(menubar, tearoff=0)
@@ -67,12 +53,15 @@ class AppUiMixin(AppBoxesMixin, AppViewModesMixin):
         export_menu.add_command(label="Background", command=self.export_background)
         export_menu.add_command(label="Palette", command=self.export_palette)
         export_menu.add_command(label="All Frames", command=self.export_all_frames)
+        export_menu.add_separator()
+        export_menu.add_command(label="3D Model (OBJ / VOX / PLY / Schematic)...", command=self.export_3d_model)
+        export_menu.add_command(label="Heightmap...", command=self.export_heightmap)
         menubar.add_cascade(label="Export", menu=export_menu)
         help_menu = tk.Menu(menubar, tearoff=0)
         self.fill_help_menu(help_menu)
         menubar.add_cascade(label="Help", menu=help_menu)
         m.configure(menu=menubar)
-        self.menus = [file_menu, edit_menu, options_menu, export_menu, help_menu]
+        self.menus = [file_menu, edit_menu, view_menu, options_menu, export_menu, help_menu]
 
         main = tk.Frame(m)
         main.pack(fill="both", expand=True, padx=10, pady=10)
@@ -168,6 +157,7 @@ class AppUiMixin(AppBoxesMixin, AppViewModesMixin):
         rb = tk.Button(self.nav_group, text="Rot 90°", width=6, command=self.rotate_preview)
         rb.pack(side="left")
         Tooltip(rb, "Rotate image 90°", self)
+        self.reverse_button(self.nav_group).pack(side="left", padx=(2, 0))
         self.bg_options_btn = tk.Button(self.bottom_bar, text="BG Options", command=self.open_bg_options)
         self.bg_options_btn._cp_keep = True
         self.update_bottom_bar()

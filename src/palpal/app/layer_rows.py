@@ -2,7 +2,8 @@
 
 from ..core.common import *  # noqa: F401,F403  (stdlib, Tk, Pillow and the app constants)
 from ..core.colors import to_hex
-from ..core.images import BLEND_MODES, ImageLayer, PaletteLayer, clone_palette
+from ..core.blend import BLEND_MODES
+from ..core.layers import ImageLayer, PaletteLayer
 from ..ui.theme import Theme, Tooltip
 
 

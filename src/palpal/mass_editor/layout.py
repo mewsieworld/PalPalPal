@@ -1,10 +1,8 @@
 """Mass Frame Editor: the window layout."""
 
 from ..core.common import *  # noqa: F401,F403  (stdlib, Tk, Pillow and the app constants)
-from ..core.storage import export_dir
-from ..core.colors import avoid_key, bg_fill, flat_palette, hsl_to_rgb, parse_hex, rgb_to_hsl, to_hex
-from ..ui.theme import Theme, center_on
-from ..ui.widgets import draw_swatch, swatch_grid
+from ..ui.widgets import swatch_grid
+from ..ui.theme import hint
 from .constants import FRAME_EXPORT_FORMATS
 
 
@@ -19,7 +17,19 @@ class MassEditorLayoutMixin:
         tk.Label(top, text="Mass Frame Editor", font=("Arial", 13, "bold")).pack(side="left")
         tk.Label(top, text="   editing %s through %s: every change reaches every frame that uses the index"
                  % (name, self.palette.name if self.palette else "-"), fg="gray").pack(side="left")
-        tk.Button(top, text="Close", command=self.close).pack(side="right")
+        apply = tk.Button(top, text="Apply", width=10, bg="#2e7d32", fg="white", activebackground="#388e3c",
+                          activeforeground="white", command=self.apply_changes)
+        apply._cp_keep = True
+        apply.pack(side="right")
+        self.applied_lbl = tk.Label(top, text="", fg="gray")
+        self.applied_lbl.pack(side="right", padx=(0, 8))
+
+        # Close (bottom left) cancels whatever wasn't applied; packed first so it keeps its place at the bottom
+        bottom = tk.Frame(self.win)
+        bottom.pack(side="bottom", fill="x", padx=10, pady=(0, 10))
+        tk.Button(bottom, text="Close", width=10, command=self.close).pack(side="left")
+        hint(tk.Label(bottom, text="Changes show live; Apply keeps them, Close throws away anything not applied.",
+                      fg="gray", font=("Arial", 8)), side="left", padx=(10, 0))
 
         body = tk.Frame(self.win)
         body.pack(fill="both", expand=True, padx=10)
@@ -112,12 +122,15 @@ class MassEditorLayoutMixin:
 
         maps = tk.LabelFrame(right, text="Mappings", font=("Arial", 10, "bold"))
         maps.pack(fill="both", expand=True, pady=(8, 0))
-        self.map_text = tk.Text(maps, height=8, width=24, font=("Consolas", 9))
+        self.map_text = tk.Text(maps, height=8, width=24, font=("Consolas", 9), undo=True)
         self.map_text.pack(fill="both", expand=True, padx=4, pady=4)
+        # Typing "index=#RRGGBB" lines here recolors those indexes live
+        self.map_text.bind("<KeyRelease>", lambda e: self.mappings_edited())
         row = tk.Frame(maps)
         row.pack(fill="x", padx=4, pady=(0, 4))
-        tk.Button(row, text="Copy Mappings", command=self.copy_mappings).pack(side="left")
-        tk.Button(row, text="Reset All", command=self.reset_all).pack(side="right")
+        tk.Button(row, text="Copy", command=self.copy_mappings).pack(side="left")
+        tk.Button(row, text="Paste", command=self.paste_mappings).pack(side="left", padx=(4, 0))
+        tk.Button(row, text="Reset", command=self.reset_all).pack(side="right")
 
         export = tk.LabelFrame(right, text="Export Frames", font=("Arial", 10, "bold"))
         export.pack(fill="x", pady=(8, 0))
@@ -131,7 +144,7 @@ class MassEditorLayoutMixin:
             side="left", padx=(4, 0))
 
         strip_box = tk.LabelFrame(self.win, text="Frame Strip", font=("Arial", 10, "bold"))
-        strip_box.pack(fill="x", padx=10, pady=(6, 10))
+        strip_box.pack(fill="x", padx=10, pady=(6, 6))
         row = tk.Frame(strip_box)
         row.pack(fill="x", padx=4, pady=(2, 0))
         tk.Label(row, text="Frames to show:").pack(side="left")

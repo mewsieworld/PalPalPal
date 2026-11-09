@@ -1,13 +1,7 @@
 """Img2img Palette Swap: recoloring, filters and the mapping tools."""
 
 from ..core.common import *  # noqa: F401,F403  (stdlib, Tk, Pillow and the app constants)
-from ..core.storage import export_dir
-from ..core.colors import bg_fill, color_dist, hsl_to_rgb, luminosity, rgb_to_hsl, to_hex
-from ..core.images import Frame, ImageLayer, convert_image, sample_unique_colors
-from ..ui.theme import Theme, Tooltip, center_on
-from ..preview.canvas import unxform_point, xform_image
-from ..ui.dialogs import ChoiceDialog
-from .mapper import MapperMixin
+from ..core.colors import color_dist, hsl_to_rgb, luminosity, rgb_to_hsl, to_hex
 
 
 class AdjusterMappingMixin:
