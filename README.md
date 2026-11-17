@@ -7,7 +7,9 @@ A Perfect Palette-n-Pixel Editor. Now supporting 3D features.
 
 1. Download Python
 2. Follow the Tutorial in `AAA Tutorials` > `pythonpathwind.png`
-![Python](AAA Tutorials/pythonpathwind.png)
+
+![Python](./AAA%20TUTORIALS/pythonpathwind.png)
+
 3. OPTIONAL: Download Visual Studio to build the EXE Yourself
 4. Extract the folder after restarting your computer
 5. Run `firststart_windows.bat` OR in the `PalPalPal` folder in File Explorer, click the Directory name (Where it shows `C:\Your\Path\To\PalPalPal\`) and type `powershell` then press `Enter`. (If you ran `firststart_windows.bat, skip to Step 9)
@@ -36,7 +38,7 @@ PalPalPal supports:
 - 3 Main Display Modes ->
 	- Big Preview:
 		- Timeline, Frame Controls, and Palette/Image layer preview along with actual Image preview
-![Main_view_lightmode](pics/main_view_light_mode.png)
+![Main_view_lightmode](pics/main_view_lightmode.png)
 	- Small Preview:
 		- Timeline, Palette/Image layer preview, smaller Image Preview window than Big, Saved
 			colors boxes, index displays, HSV Adjustments, image and frame controls
